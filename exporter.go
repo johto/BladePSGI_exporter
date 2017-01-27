@@ -149,7 +149,10 @@ func (c *BPECollector) scrape() (scrapeData BPEScrapeData) {
 		c.elog.Fatalf("invalid response from BladePSGI: unexpected data after the last line")
 	}
 	internalDatums := datums[:separator]
-	userDatums := datums[separator + 1:len(datums) - 1]
+	var userDatums [][]byte
+	if separator < len(datums) - 1 {
+		userDatums = datums[separator + 1:len(datums) - 1]
+	}
 
 	if len(internalDatums) < 3 {
 		c.elog.Fatalf("invalid response from BladePSGI: internal data section too short")
