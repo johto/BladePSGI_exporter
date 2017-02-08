@@ -18,7 +18,7 @@ import (
 
 // The list of backend states we track.  This needs to be entered by the user
 // because we don't know what any of them mean.
-var trackBackendStates = "_"
+var trackBackendStates string
 
 // statsMetrics
 const (
@@ -252,22 +252,27 @@ func (c *BPECollector) Collect(ch chan<- prometheus.Metric) {
 
 func printUsage(w io.Writer) {
 	fmt.Fprintf(w, `Usage:
-  %s [--help] STATS_SOCKET_PATH
+  %s [--help] STATS_SOCKET_PATH TRACK_BACKEND_STATES
 `, os.Args[0])
 }
 
 func main() {
 	var statsSocketPath string
 
-	if len(os.Args) != 2 {
+	if len(os.Args) == 2 {
+		if os.Args[1] == "--help" || os.Args[1] == "-h" {
+			printUsage(os.Stdout)
+			os.Exit(0)
+		} else {
+			printUsage(os.Stderr)
+			os.Exit(1)
+		}
+	} else if len(os.Args) == 3 {
+		statsSocketPath = os.Args[1]
+		trackBackendStates = os.Args[2]
+	} else {
 		printUsage(os.Stderr)
 		os.Exit(1)
-	}
-	if os.Args[1] == "--help" || os.Args[1] == "-h" {
-		printUsage(os.Stdout)
-		os.Exit(0)
-	} else {
-		statsSocketPath = os.Args[1]
 	}
 
 	elog := log.New(os.Stderr, "", log.LstdFlags)
